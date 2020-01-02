@@ -34,10 +34,10 @@ def registeOnePlayerByCode(code,codeType):
                 db.close()
                 return playerId
     elif (codeType == LoginCodeType.WECHAT_GAME):
-        return -1
+        return None
 
     elif (codeType == LoginCodeType.DEVICE_ID):
-        return -1
+        return None
 
 
 def checkTableExgist(dbName,tableName):

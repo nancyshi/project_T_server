@@ -1,6 +1,7 @@
 import sqlite3
 from enum import Enum
 from enums import LoginCodeType
+import register
 
 def getPlayerIdByCode(code,codeType):
     if (codeType == LoginCodeType.ACCOUT_AND_PASSWORD):
@@ -20,14 +21,14 @@ def getPlayerIdByCode(code,codeType):
                 cursor.close()
                 accountDB.close()
                 return playerId
-
             else:
-                pass
+                return None
 
-    elif (codeType == LoginCodeType.WECHAT_GAME):
-        pass
+    if (codeType == LoginCodeType.WECHAT_GAME):
+        return None
 
-    elif (codeType == LoginCodeType.DEVICE_ID):
-        pass
+    if (codeType == LoginCodeType.DEVICE_ID):
+        return None
 
+    
     
