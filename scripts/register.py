@@ -17,7 +17,7 @@ def registeOnePlayerByCode(code,codeType):
             cursor.execute("select * from user")
             results = cursor.fetchall()
             
-            if (results.count == 0):
+            if (len(results) == 0):
                 sqlCode = f"insert into user values ({playerAccoutInitDic[id]}, {accout}, {password}, null, null)"
                 cursor.execute(sqlCode)
                 cursor.close()
@@ -43,12 +43,13 @@ def registeOnePlayerByCode(code,codeType):
 def checkTableExgist(dbName,tableName):
     db = sqlite3.connect(dbName)
     cursor = db.cursor()
-    sqlCode = "select " + tableName + " from sqlite_master where type = ?"
+    
+    sqlCode = f"select tbl_name from sqlite_master where type = ?"
     cursor.execute(sqlCode,("table",))
     results = cursor.fetchall()
     cursor.close()
     db.close()
-    if (results.count > 0 ):
+    if (len(results) > 0 ):
         return True
     else:
         return False
@@ -61,4 +62,3 @@ def creatAccoutUserTable():
     cursor.close()
     db.commit()
     db.close()
-
