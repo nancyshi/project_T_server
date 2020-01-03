@@ -2,63 +2,38 @@ import sqlite3
 from enums import LoginCodeType
 import json
 from enums import playerAccoutDBName
+import dbMgr
 
 def registeOnePlayerByCode(code,codeType):
-    if (checkTableExgist(playerAccoutDBName,"user") == False):
-        creatAccoutUserTable()
-    if (codeType == LoginCodeType.ACCOUT_AND_PASSWORD):
-        with open("../configs/playerAccoutData.json") as f:
-            playerAccoutInitDic = json.loads(f)
-            temp = code.split("&&&",1)
-            accout = temp[0]
-            password = temp[1]
-            db = sqlite3.connect(playerAccoutDBName)
-            cursor = db.cursor()
-            cursor.execute("select * from user")
-            results = cursor.fetchall()
-            
-            if (len(results) == 0):
-                sqlCode = f"insert into user values ({playerAccoutInitDic[id]}, {accout}, {password}, null, null)"
-                cursor.execute(sqlCode)
-                cursor.close()
-                db.commit()
-                db.close()
-                return playerAccoutInitDic[id]
-            else:
-                lastResult = results[results.count -1]
-                playerId = lastResult[0] + 1
-                sqlCode = f"insert into user values ({playerId}, {accout}, {password}, null, null)"
-                cursor.execute(sqlCode)
-                cursor.close()
-                db.commit()
-                db.close()
-                return playerId
-    elif (codeType == LoginCodeType.WECHAT_GAME):
-        return None
-
-    elif (codeType == LoginCodeType.DEVICE_ID):
-        return None
-
-
-def checkTableExgist(dbName,tableName):
-    db = sqlite3.connect(dbName)
-    cursor = db.cursor()
-    
-    sqlCode = f"select tbl_name from sqlite_master where type = ?"
-    cursor.execute(sqlCode,("table",))
-    results = cursor.fetchall()
-    cursor.close()
-    db.close()
-    if (len(results) > 0 ):
-        return True
-    else:
-        return False
-
-
-def creatAccoutUserTable():
+    playerAccoutInitDic = None
+    with open("../configs/playerAccoutData.json") as f:
+        playerAccoutInitDic = json.load(f)[0]
     db = sqlite3.connect(playerAccoutDBName)
     cursor = db.cursor()
-    cursor.execute("create table user (id int primary key, accout text, password text, wechatOpenId text, deviceId text)")
-    cursor.close()
-    db.commit()
-    db.close()
+    cursor.execute("select * from user")
+    results = cursor.fetchall()
+    
+    playerId = playerAccoutInitDic["id"]
+    if (len(results) > 0):
+        lastResult = results[len(results) -1]
+        playerId = lastResult[0] + 1
+    
+    sqlCode = None
+    if (codeType == LoginCodeType.ACCOUT_AND_PASSWORD):
+        temp = code.split("&&&",1)
+        account = temp[0]
+        password = temp[1]
+        sqlCode = f"insert into user values ({playerId}, '{account}', '{password}', null, null)"
+        
+    elif (codeType == LoginCodeType.WECHAT_GAME):
+        pass
+
+    elif (codeType == LoginCodeType.DEVICE_ID):
+        sqlCode = f"insert into user values ({playerId}, null, null, null, '{code}')"
+
+    if (sqlCode != None):
+        cursor.execute(sqlCode)
+        cursor.close()
+        db.commit()
+        db.close()
+        return playerId

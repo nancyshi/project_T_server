@@ -2,10 +2,13 @@ import sqlite3
 from enums import LoginCodeType,ERRO_CODE,playerAccoutDBName
 from baseHttpHandler import BaseHttpHandler
 import json
+import dbMgr
+import register
+import time
 
 class LoginHandler(BaseHttpHandler):
     def post(self):
-        print(f"one connection from {self.request.remote_ip}")
+        print(f"one connection from {self.request.remote_ip}, time: {time.time()}")
         body = self.request.body
         bodyDic = json.loads(body)
         code = bodyDic["code"]
@@ -31,9 +34,6 @@ class LoginHandler(BaseHttpHandler):
 
 def getPlayerIdByCode(code,codeType):
     if (codeType == LoginCodeType.ACCOUT_AND_PASSWORD.value):
-        print("hey!!!!!!")
-        if (checkTableExgist(playerAccoutDBName,"user") == False):
-            creatAccoutUserTable()
         temp = code.split("&&&")
         account = temp[0]
         password = temp[1]
@@ -55,32 +55,31 @@ def getPlayerIdByCode(code,codeType):
         else:
             return None
 
-    if (codeType == LoginCodeType.WECHAT_GAME):
-        return None
+    if (codeType == LoginCodeType.WECHAT_GAME.value):
+        results = dbMgr.queryMathResultFromUserTable(code,"wechatOpenId")
+        playerId = None
+        if (len(results) > 0):
+            playerId = results[0][0]
+            
+        else:
+            playerId = register.registeOnePlayerByCode(code,LoginCodeType.WECHAT_GAME)
+        if (playerId != None):
+            return playerId
+        else:
+            return None
 
-    if (codeType == LoginCodeType.DEVICE_ID):
-        return None
+    if (codeType == LoginCodeType.DEVICE_ID.value):
+        results = dbMgr.queryMathResultFromUserTable(code,"deviceId")
+        playerAccoutDBName = None
+        if (len(results) > 0):
+            playerId = results[0][0]
+        
+        else:
+            #regist one player by device id
+            playerId = register.registeOnePlayerByCode(code,LoginCodeType.DEVICE_ID)
+        
+        if (playerId != None):
+            return playerId
 
-
-def checkTableExgist(dbName,tableName):
-    db = sqlite3.connect(dbName)
-    cursor = db.cursor()
-    
-    sqlCode = f"select tbl_name from sqlite_master where type = ?"
-    cursor.execute(sqlCode,("table",))
-    results = cursor.fetchall()
-    cursor.close()
-    db.close()
-    if (len(results) > 0 ):
-        return True
-    else:
-        return False
-
-
-def creatAccoutUserTable():
-    db = sqlite3.connect(playerAccoutDBName)
-    cursor = db.cursor()
-    cursor.execute("create table user (id int primary key, accout text, password text, wechatOpenId text, deviceId text)")
-    cursor.close()
-    db.commit()
-    db.close()
+        else: 
+            return None
