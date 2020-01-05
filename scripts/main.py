@@ -3,11 +3,13 @@ import tornado.web
 import os
 
 from login import LoginHandler
+from dataMgr import DataMgrHandler
 path = os.sys.path[0]
 os.chdir(path)
 
 app = tornado.web.Application([
-    (r"/login",LoginHandler)
+    (r"/login",LoginHandler),
+    (r"/data",DataMgrHandler)
 ])
 
 

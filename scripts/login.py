@@ -8,7 +8,7 @@ import time
 
 class LoginHandler(BaseHttpHandler):
     def post(self):
-        print(f"one connection from {self.request.remote_ip}, time: {time.time()}")
+        print(f"LoginHandler: one connection from {self.request.remote_ip}, time: {time.time()}")
         body = self.request.body
         bodyDic = json.loads(body)
         code = bodyDic["code"]
@@ -56,7 +56,7 @@ def getPlayerIdByCode(code,codeType):
             return None
 
     if (codeType == LoginCodeType.WECHAT_GAME.value):
-        results = dbMgr.queryMathResultFromUserTable(code,"wechatOpenId")
+        results = dbMgr.queryMathResultFromTable(code,"wechatOpenId")
         playerId = None
         if (len(results) > 0):
             playerId = results[0][0]
@@ -69,7 +69,7 @@ def getPlayerIdByCode(code,codeType):
             return None
 
     if (codeType == LoginCodeType.DEVICE_ID.value):
-        results = dbMgr.queryMathResultFromUserTable(code,"deviceId")
+        results = dbMgr.queryMathResultFromTable(code,"deviceId")
         playerAccoutDBName = None
         if (len(results) > 0):
             playerId = results[0][0]

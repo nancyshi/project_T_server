@@ -10,3 +10,4 @@ class ERRO_CODE(Enum):
     WRONG_PASSWORD = 2
 
 playerAccoutDBName = "playerAccout.db"
+playerDataDBName = "playerData.db"
