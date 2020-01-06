@@ -147,10 +147,10 @@ def checkDataValid():
     makeColsCorrect(playerAccoutDBName,"user","../configs/playerAccoutData.json")
     makeColsCorrect(playerDataDBName,"user","../configs/playerInitData.json")
 
-def insertOneRecordToTableByOneDic(dict,dbName,tableName):
+def insertOneRecordToTableByOneDic(dic,dbName,tableName):
     sqlCode = f"insert into {tableName} ("
     index = 0
-    for k in dict.keys():
+    for k in dic.keys():
         strForAddToSql = f"{k}"
         if (index > 0):
             strForAddToSql = f", {k}"
@@ -159,7 +159,7 @@ def insertOneRecordToTableByOneDic(dict,dbName,tableName):
     sqlCode = sqlCode + f") values ("
     
     index = 0
-    for v in dict.values():
+    for v in dic.values():
         strForAddToSql = f"'{v}'"
         if (index > 0):
             strForAddToSql = f", '{v}'"
@@ -173,12 +173,28 @@ def insertOneRecordToTableByOneDic(dict,dbName,tableName):
     db.commit()
     db.close()
 
+def writeRecordsToTableByOneDic(dic,dbName,tableName,primaryKeyName):
+    if (len(dic) == 0):
+        return
+    db = sqlite3.connect(dbName)
+    cursor = db.cursor()
+
+    for k, v in dic.items():
+        sqlCode = f"update {tableName} set "
+        index = 0
+        for key, value in v.items():
+            strForAdd = f"{key} = '{value}'"
+            if index > 0:
+                strForAdd = ", " + strForAdd
+            sqlCode = sqlCode + strForAdd
+            index += 1
+        sqlCode = sqlCode + f" where {primaryKeyName} = '{k}'"
+        cursor.execute(sqlCode)
+    cursor.close()
+    db.commit()
+    db.close()
+
 checkDataValid()
 if __name__ == "__main__":
-    dic = {
-        "id": 100002,
-        "name": "test",
-        "gold": 200
-    }
-    insertOneRecordToTableByOneDic(dic,playerDataDBName,"user")
     pass
+    
