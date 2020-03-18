@@ -26,7 +26,7 @@ def registeOnePlayerByCode(code,codeType):
         sqlCode = f"insert into user values ({playerId}, '{account}', '{password}', null, null)"
         
     elif (codeType == LoginCodeType.WECHAT_GAME):
-        sqlCode = f"insert into user values ({playerId}, null, null, '{code}')"
+        sqlCode = f"insert into user values ({playerId}, null, null, '{code}', null)"
 
     elif (codeType == LoginCodeType.DEVICE_ID):
         sqlCode = f"insert into user values ({playerId}, null, null, null, '{code}')"

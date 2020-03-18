@@ -5,16 +5,16 @@ from enums import playerDataDBName
 import dbMgr
 import time
 from threading import Timer
+import datetime
+
 class DataMgrHandler(BaseHttpHandler):
     def post(self):
-        print(f"DataMgrHandler: one connection from {self.request.remote_ip}, time: {time.time()}")
         body = self.request.body
         bodyDic = json.loads(body)
         playerId = bodyDic["playerId"]
         requestType = bodyDic["requestType"]
         message = None
         if (requestType == "query"):
-
             playerData = dataMgr.getPlayerDataById(playerId)
             if (playerData):
                 message = {"type": "success","playerData": playerData}
@@ -22,10 +22,9 @@ class DataMgrHandler(BaseHttpHandler):
                 message = {"type": "fail"}
         elif(requestType == "commit"):
             commitDic = bodyDic["commitBody"]
-            dataMgr.commitData(playerId,commitDic)
-            message = {"type": "commitSuccess"}
+            playerData = dataMgr.commitData(playerId,commitDic)
+            message = {"type": "commitSuccess","refreshDelta": playerData["refreshDelta"]}
         if (message):
-            print(f"dataMgr: message is {message}")
             self.write(message)
             self.flush()
             self.finish()
@@ -36,15 +35,17 @@ class DataMgr(object):
         super().__init__()
         self.playerDatas = {}
         self.expireDatas = {}
-        self.autoSavedInterval = 3600
-        self.autoClearInterval = 1800
+        self.autoSavedInterval = 60
+        self.autoClearInterval = 100
         self.expireInterval = 1800
+        self.refreshTimeHour = 3
+        self.refreshTimeMinute = 2
+        self.refreshTimeSecond = 0
 
     def getPlayerDataById(self,id):
-
+        playerDataForReturn = None
         if self.playerDatas.get(str(id),None) != None:
-            self.updateExpireData(id)
-            return self.playerDatas[str(id)]
+            playerDataForReturn = self.playerDatas[str(id)]
 
         else:
             results = dbMgr.queryMathResultFromTable(id,"id",playerDataDBName)
@@ -59,9 +60,10 @@ class DataMgr(object):
                     playerData[colNames[index]] = playerDataArry[index]
 
             if (len(playerData) > 0):
-                self.playerDatas[str(id)] = playerData
-                self.updateExpireData(id)
-                return playerData
+                playerDataForReturn = playerData
+
+        self.resolveRefresh(playerDataForReturn)
+        return playerDataForReturn    
     
     def creatOnePlayerData(self,id):
         playerInitDic = None
@@ -75,6 +77,7 @@ class DataMgr(object):
 
     def commitData(self,playerId,commitBody):
         playerData = self.getPlayerDataById(playerId)
+        self.resolveRefresh(playerData)
         for k,v in commitBody.items():
             for key, value in playerData.items():
                 if (k == key):
@@ -83,8 +86,7 @@ class DataMgr(object):
                     playerData[key] = commitBody[k]
                     break
         
-        self.playerDatas[str(playerId)] = playerData
-        self.updateExpireData(self,id)
+        return playerData
 
     def savePlayerDatasToDB(self):
         dbMgr.writeRecordsToTableByOneDic(self.playerDatas,playerDataDBName,"user","id")
@@ -105,20 +107,19 @@ class DataMgr(object):
 
             for oneKey in keysForClear:
                 self.playerDatas.pop(oneKey)
-                self.expireDatas.pop(oneKey)
-            
+                self.expireDatas.pop(oneKey)  
 
     def updateExpireData(self,playerId):
         self.expireDatas[str(playerId)] = time.time() + self.expireInterval
 
     def startAutoSavePlayerDataToDB(self):
-        def temp(self):
-            self.savePlayerDatasToDB(self)
-            t = Timer(self.autoSavedInterval,temp,[self])
+        def temp():
+            self.savePlayerDatasToDB()
+            t = Timer(self.autoSavedInterval,temp)
             self._autoSaveTimer = t
             t.start()
         
-        t = Timer(self.autoSavedInterval,temp,[self])
+        t = Timer(self.autoSavedInterval,temp)
         self._autoSaveTimer = t
         t.start()
         
@@ -129,19 +130,57 @@ class DataMgr(object):
         
     
     def startAutoClearUnusedPlayerData(self):
-        def temp(self):
-            self.clearUnusedPlayerData(self)
-            t = Timer(self.autoClearInterval,temp,[self])
+        def temp():
+            self.clearUnusedPlayerData()
+            t = Timer(self.autoClearInterval,temp)
             self._autoClearTimer = t
             t.start()
         
-        t = Timer(self.autoSavedInterval,temp,[self])
+        t = Timer(self.autoSavedInterval,temp)
         self._autoClearTimer = t
         t.start()        
         
     def stopAutoClearUnusedPlayerData(self):
         if (self._autoClearTimer):
             self._autoClearTimer.cancel()
+
+    def resolveRefresh(self,playerData):
+        lastInteractTime = playerData["lastInteractTime"]
+        currentTime = time.time()
+        if lastInteractTime != 0:
+            formatLastInteractTime = time.localtime(lastInteractTime)
+            year = formatLastInteractTime.tm_year
+            month = formatLastInteractTime.tm_mon
+            day = formatLastInteractTime.tm_mday
+
+            tmpRefreshTime = datetime.datetime(year,month,day,self.refreshTimeHour,self.refreshTimeMinute,self.refreshTimeSecond)
+            tmpRefreshTime = tmpRefreshTime.timetuple()
+            tmpRefreshTime = time.mktime(tmpRefreshTime)
+            if tmpRefreshTime < lastInteractTime:
+                tmpRefreshTime = tmpRefreshTime + 24 * 60 * 60
+            
+            if currentTime >= tmpRefreshTime:
+                playerData["physicalPower"] = playerData["maxPhysicalPower"]
+                playerData["heart"] = playerData["maxHeart"]
+
+        playerData["lastInteractTime"] = currentTime
+        formatCurrentTime = time.localtime(currentTime)
+        y = formatCurrentTime.tm_year
+        m = formatCurrentTime.tm_mon
+        d = formatCurrentTime.tm_mday
+        targetRefreshTime = datetime.datetime(y,m,d,self.refreshTimeHour,self.refreshTimeMinute,self.refreshTimeSecond)
+        targetRefreshTime = targetRefreshTime.timetuple()
+        targetRefreshTime = time.mktime(targetRefreshTime)
+        if targetRefreshTime < currentTime:
+            targetRefreshTime = targetRefreshTime + 24 * 60 * 60
+        
+        refreshDelta = targetRefreshTime - currentTime
+        playerData["refreshDelta"] = refreshDelta
+        id = playerData["id"]
+        self.playerDatas[str(id)] = playerData
+        self.updateExpireData(id)
+        return playerData
+        
 
 dataMgr = DataMgr()
 dataMgr.startAutoSavePlayerDataToDB()

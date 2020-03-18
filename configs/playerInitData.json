@@ -2,6 +2,16 @@
     {
         "id": 100000001,
         "name": "newPlayer",
-        "gold": 100
+        "physicalPower": 100,
+        "maxPhysicalPower": 100,
+        "heart": 100,
+        "maxHeart": 100,
+        "currentSection": 1,
+        "currentLevel": 1,
+        "physicalPowerCostedFlag": 0,
+        "lastInteractTime": 0,
+        "refreshDelta": 0,
+        "initAdWatchedFlag": 0,
+        "adSystemEnabledFlag": 0
     }
 ]

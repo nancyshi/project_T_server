@@ -1,7 +1,7 @@
 from enum import Enum
 class LoginCodeType(Enum):
-    WECHAT_GAME = 1
-    ACCOUT_AND_PASSWORD = 2
+    WECHAT_GAME = 2
+    ACCOUT_AND_PASSWORD = 1
     DEVICE_ID = 3
 
 class ERRO_CODE(Enum):
