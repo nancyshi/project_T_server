@@ -10,8 +10,12 @@
         "currentLevel": 1,
         "physicalPowerCostedFlag": 0,
         "lastInteractTime": 0,
-        "refreshDelta": 0,
         "initAdWatchedFlag": 0,
-        "adSystemEnabledFlag": 0
+        "adSystemEnabledFlag": 0,
+        "signInStatus": 1,
+        "signInRefreshDelta": "" ,
+        "mails": {},
+        "mailConditionIndex": {},
+        "minSteps": {}
     }
 ]

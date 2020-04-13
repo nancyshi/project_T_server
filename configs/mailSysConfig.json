@@ -1,0 +1,35 @@
+[
+    {
+       "mainLine": {
+            "conditions": [
+                {
+                    "conditionType": 1,
+                    "conditionPara": 1,
+                    "mailId": 1001
+                },
+                {
+                    "conditionType": 1,
+                    "conditionPara": 5,
+                    "mailId": 1002
+                },
+                {
+                    "conditionType": 1,
+                    "conditionPara": 10,
+                    "mailId": 1003
+                }
+            ]
+        },
+       "branchLine1": {
+            "conditions": [
+                {
+                    "conditionType": 2,
+                    "conditionPara": {
+                        "levelId": 3,
+                        "minStepNum": 8
+                    },
+                    "mailId": 1101
+                }
+            ]
+       }
+    }
+]

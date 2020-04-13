@@ -160,12 +160,16 @@ def insertOneRecordToTableByOneDic(dic,dbName,tableName):
     
     index = 0
     for v in dic.values():
+        if type(v) is dict:
+            v = json.dumps(v)
+            
         strForAddToSql = f"'{v}'"
         if (index > 0):
             strForAddToSql = f", '{v}'"
         index += 1
         sqlCode = sqlCode + strForAddToSql
     sqlCode = sqlCode + f")"
+    
     db = sqlite3.connect(dbName)
     cursor = db.cursor()
     cursor.execute(sqlCode)
@@ -183,6 +187,8 @@ def writeRecordsToTableByOneDic(dic,dbName,tableName,primaryKeyName):
         sqlCode = f"update {tableName} set "
         index = 0
         for key, value in v.items():
+            if (type(value) is dict):
+                value = json.dumps(value)
             strForAdd = f"{key} = '{value}'"
             if index > 0:
                 strForAdd = ", " + strForAdd
