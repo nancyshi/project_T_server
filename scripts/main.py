@@ -8,6 +8,7 @@ from dataMgr import DataMgrHandler
 from signInSys import SignInSysHandler
 from mailSystem import MailSystemHandler
 from helper import HelperHandler
+from longConnectHandler import LongConnectHandler
 
 
 app = tornado.web.Application([
@@ -15,7 +16,8 @@ app = tornado.web.Application([
     (r"/data",DataMgrHandler),
     (r"/signIn",SignInSysHandler),
     (r"/mail",MailSystemHandler),
-    (r"/helper",HelperHandler)
+    (r"/helper",HelperHandler),
+    (r"/longConnect",LongConnectHandler)
 ])
 print (path)
 

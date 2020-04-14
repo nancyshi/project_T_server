@@ -1,6 +1,3 @@
-di = {
-    "a": 1,
-    "b": 2
-}
-
-print(di.keys())
+a = ["A","B","C"]
+for index in a:
+    print(index)
