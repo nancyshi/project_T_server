@@ -4,6 +4,7 @@ import json
 import time
 from threading import Timer
 import asyncio
+from longConnectHandler import longConnectMessages
 
 
 class MailSystemHandler(BaseHttpHandler):
@@ -14,6 +15,7 @@ class MailSystemHandler(BaseHttpHandler):
         message = None
         mailId = bodyDic["mailId"]
         requestType = bodyDic["requestType"]
+        willSendMailFlag = False
         if requestType == "readMail":
             index = bodyDic["selectedOptionIndex"]
             result = mailSystem.readOneMail(playerId,mailId,index)
@@ -27,12 +29,16 @@ class MailSystemHandler(BaseHttpHandler):
                     "reason": "player don't have this mail"
                 }
         elif requestType == "sendMail":
-            tag = bodyDic["tag"]
-            delay = bodyDic["delay"]
-            timeStamp = await mailSystem.sendOneMailToPlayerWithDelay(playerId,mailId,tag,delay)
+            # tag = bodyDic["tag"]
+            # delay = bodyDic["delay"]
+            # timeStamp = await mailSystem.sendOneMailToPlayerWithDelay(playerId,mailId,tag,delay)
+            # message = {
+            #     "type": "success",
+            #     "timeStamp": timeStamp
+            # }
+            willSendMailFlag = True
             message = {
-                "type": "success",
-                "timeStamp": timeStamp
+                "type": "success"
             }
 
         elif requestType == "reachCondition":
@@ -54,6 +60,18 @@ class MailSystemHandler(BaseHttpHandler):
             self.write(message)
             self.flush()
             self.finish()
+
+        if willSendMailFlag == True:
+            tag = bodyDic["tag"]
+            delay = bodyDic["delay"]
+            timeStamp = await mailSystem.sendOneMailToPlayerWithDelay(playerId,mailId,tag,delay)
+            oneMessage = {
+                "type": "mailSysSendMail",
+                "mailId": mailId,
+                "timeStamp": timeStamp,
+                "tag": tag
+            }
+            longConnectMessages.pushOneMessageByPlayerId(playerId,oneMessage)
 
 
 class MailSystem(object):

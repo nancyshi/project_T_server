@@ -17,11 +17,12 @@ class LongConnectHandler(BaseHttpHandler):
             else:
                 message = {
                     "type": "message",
-                    "message": messages
+                    "messages": messages
                 }
         if message != None:
             self.write(message)
             self.flush()
+            self.finish()
             longConnectMessages.initMessagesByPlayerId(playerId)
 
 
