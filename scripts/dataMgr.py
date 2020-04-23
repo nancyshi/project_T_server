@@ -32,7 +32,7 @@ class DataMgrHandler(BaseHttpHandler):
             self.write(message)
             self.flush()
             self.finish()
-    
+
 
 class DataMgr(object):
     def __init__(self):

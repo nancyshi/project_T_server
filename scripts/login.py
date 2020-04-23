@@ -29,11 +29,10 @@ class LoginHandler(BaseHttpHandler):
             message = {"type":"login_fail","reason":ERRO_CODE.NO_SUCH_PLAYER.value}
         
         if (message):
-            print(f"message is {message}")
             self.write(message)
             self.flush()
             self.finish()
-
+            print(message)
 
 
 async def getPlayerIdByCode(code,codeType):

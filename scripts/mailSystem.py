@@ -44,16 +44,24 @@ class MailSystemHandler(BaseHttpHandler):
         elif requestType == "reachCondition":
             tag = bodyDic["tag"]
             result = mailSystem.reachConditionIndex(playerId,tag,mailId)
-            if result != False:
-                message = {
-                    "type": "success",
-                    "mail": result
-                }
-            else :
-                message = {
-                    "type": "fail",
-                    "reason": f"out of index of tag {tag}"
-                }
+            # if result != False:
+            #     message = {
+            #         "type": "success",
+            #         "mail": result
+            #     }
+            # else :
+            #     message = {
+            #         "type": "fail",
+            #         "reason": f"out of index of tag {tag}"
+            #     }
+
+            isEnd = result[1]
+            mail = result[0]
+            message = {
+                "type": "success",
+                "mail": mail,
+                "isEnd": isEnd
+            }
 
         if message:
             print(f"mailSys: message is {message}")
@@ -101,18 +109,21 @@ class MailSystem(object):
         playerData = dataMgr.dataMgr.getPlayerDataById(playerId)
         currentTagIndex = playerData["mailConditionIndex"][tag]
         totalLen = len(self.mailSysConfig[tag]["conditions"])
+        mail = {
+            "status": 0, #0 = unreaded , 1 = readed,
+            "tag": tag,
+            "timeStamp": time.time(),
+            "selectedOptionIndex": -1
+        }
+        isEnd = 0
         if currentTagIndex + 1 < totalLen:
             playerData["mailConditionIndex"][tag] += 1
-            mail = {
-                "status": 0, #0 = unreaded , 1 = readed,
-                "tag": tag,
-                "timeStamp": time.time(),
-                "selectedOptionIndex": -1
-            }
-            playerData["mails"][str(mailId)] = mail
-            return mail
-        else:
-            return False
+        elif currentTagIndex + 1 == totalLen:
+            playerData["mailConditionIndex"][tag] = -1
+            isEnd = 1
+        
+        playerData["mails"][str(mailId)] = mail
+        return (mail,isEnd)
 
     def initMailSysData(self, givenInitDic):
         for key in self.mailSysConfig:
