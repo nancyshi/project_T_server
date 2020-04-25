@@ -17,6 +17,7 @@
         "mails": {},
         "mailConditionIndex": {},
         "minSteps": {},
-        "preLevel": -1
+        "preLevel": -1,
+        "isGuilded": 0
     }
 ]
