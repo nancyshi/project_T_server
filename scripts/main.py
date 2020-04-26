@@ -10,6 +10,7 @@ from signInSys import SignInSysHandler
 from mailSystem import MailSystemHandler
 from helper import HelperHandler
 from longConnectHandler import LongConnectHandler
+from storySys import StorySysHandler
 
 setting = {
     "static_path": os.path.join(os.path.dirname(__file__),"static")
@@ -21,7 +22,8 @@ app = tornado.web.Application([
     (r"/signIn",SignInSysHandler),
     (r"/mail",MailSystemHandler),
     (r"/helper",HelperHandler),
-    (r"/longConnect",LongConnectHandler)
+    (r"/longConnect",LongConnectHandler),
+    (r"/story",StorySysHandler)
 ],**setting)
 
 server = tornado.httpserver.HTTPServer(app, ssl_options = {

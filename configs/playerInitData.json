@@ -18,6 +18,8 @@
         "mailConditionIndex": {},
         "minSteps": {},
         "preLevel": -1,
-        "isGuilded": 0
+        "isGuilded": 0,
+        "storySysId": -1,
+        "storySysIndex": 0
     }
 ]

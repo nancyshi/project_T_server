@@ -8,6 +8,7 @@ from threading import Timer
 import datetime
 import refreshSystem
 import mailSystem
+import storySys
 
 class DataMgrHandler(BaseHttpHandler):
     def post(self):
@@ -81,6 +82,7 @@ class DataMgr(object):
 
         playerInitDic["id"] = id
         mailSystem.mailSystem.initMailSysData(playerInitDic)
+        storySys.storySys.setupInitIndex(playerInitDic)
         dbMgr.insertOneRecordToTableByOneDic(playerInitDic,playerDataDBName,"user")
         
         return playerInitDic
