@@ -39,8 +39,8 @@ class SignInSys(refreshSystem.RefreshSystem):
         self.refreshTimeHour = 5
         self.refreshTimeMinute = 0
         self.refreshTimeSecond = 0
-        self.physicalPowerAddNum = 10
-        self.heartAddNum = 20
+        self.physicalPowerAddNum = 5
+        self.heartAddNum = 10
         self.addRateForAd = 2
 
     def onRefresh(self,playerId):
