@@ -2,9 +2,9 @@
     {
         "id": 100000001,
         "name": "newPlayer",
-        "physicalPower": 100,
+        "physicalPower": 20,
         "maxPhysicalPower": 100,
-        "heart": 100,
+        "heart": 20,
         "maxHeart": 100,
         "currentSection": 1,
         "currentLevel": 1,
